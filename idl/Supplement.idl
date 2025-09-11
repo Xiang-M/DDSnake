@@ -1,0 +1,9 @@
+module Supplement{
+    // 加入房间的申请和回复
+    struct JoinRoom {
+        long player_id;
+        string room_id;
+        string player_nickname;
+        string status;//"REQUEST" "SUCCESS" "FAILURE"
+    };
+};

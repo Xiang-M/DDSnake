@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="#1a1a1a"
+    android:gravity="center"
+    android:padding="24dp">
+
+    <!-- 左侧：游戏标题和欢迎信息 -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <!-- 游戏标题 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🐍 贪吃蛇大作战 🐍"
+            android:textSize="28sp"
+            android:textColor="#4CAF50"
+            android:layout_marginBottom="16dp"
+            android:gravity="center" />
+
+        <!-- 欢迎用户信息 -->
+        <TextView
+            android:id="@+id/tv_welcome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="欢迎回来，玩家！"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="16dp" />
+
+        <!-- 游戏说明 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="游戏说明：吃到食物可以增长身体和得分\n避免撞到墙壁或其他玩家的身体"
+            android:textColor="#CCCCCC"
+            android:textSize="12sp"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+    <!-- 右侧：按钮组 -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="16dp">
+
+        <!-- 创建房间按钮 -->
+        <Button
+            android:id="@+id/btn_create_room"
+            android:layout_width="200dp"
+            android:layout_height="45dp"
+            android:text="🏠 创建房间"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:background="#4CAF50"
+            android:layout_marginBottom="10dp" />
+
+        <!-- 加入房间按钮 -->
+        <Button
+            android:id="@+id/btn_join_room"
+            android:layout_width="200dp"
+            android:layout_height="45dp"
+            android:text="🚪 加入房间"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:background="#2196F3"
+            android:layout_marginBottom="10dp" />
+
+        <!-- 单人游戏按钮 -->
+        <Button
+            android:id="@+id/btn_single_game"
+            android:layout_width="200dp"
+            android:layout_height="45dp"
+            android:text="🎮 单人游戏"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:background="#FF9800"
+            android:layout_marginBottom="10dp" />
+
+        <!-- 退出登录按钮 -->
+        <Button
+            android:id="@+id/btn_logout"
+            android:layout_width="200dp"
+            android:layout_height="45dp"
+            android:text="🚪 退出登录"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:background="#F44336"
+            android:layout_marginBottom="10dp" />
+
+    </LinearLayout>
+
+</LinearLayout>
+

@@ -1,10 +1,12 @@
 package com.example.snakegame.data.dds.publisher;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.snakegame.DDSgenerated.InRoom;
 import com.example.snakegame.DDSgenerated.InRoomDataWriter;
 import com.example.snakegame.DDSgenerated.InRoomTypeSupport;
+import com.example.snakegame.uitls.DataCallbackRoom;
 import com.zrdds.domain.DomainParticipant;
 import com.zrdds.domain.DomainParticipantFactory;
 import com.zrdds.infrastructure.InstanceHandle_t;
@@ -58,7 +60,7 @@ public class InRoomPublisher {
 
         // 创建 Topic
         tp = dp.create_topic(
-                "CREATEROOM",
+                "INROOM",
                 ts.get_type_name(),
                 DomainParticipant.TOPIC_QOS_DEFAULT,
                 null,
@@ -85,12 +87,14 @@ public class InRoomPublisher {
         Log.d(TAG, "create data writer succeeded");
     }
 
-    public static void sendData(InRoom data) {
+    public static void sendData(DataCallbackRoom callback,InRoom data) {
         rtn = writer.write(data, InstanceHandle_t.HANDLE_NIL_NATIVE);
         if (rtn != ReturnCode_t.RETCODE_OK)
         {
             Log.d(TAG, "write failed");
+            return;
         }
         Log.d(TAG, "write succeeded");
+        callback.sendDataSuccess();
     }
 }

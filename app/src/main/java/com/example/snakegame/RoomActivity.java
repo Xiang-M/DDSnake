@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.snakegame.DDSgenerated.PlayerAuth;
 import com.example.snakegame.DDSgenerated.PlayerColorMapping;
 import com.example.snakegame.DDSgenerated.PlayerColorMappingSeq;
 import com.example.snakegame.DDSgenerated.PlayerColorMappings;
@@ -25,13 +26,15 @@ import com.example.snakegame.DDSgenerated.LeaveRoom;
 
 import com.example.snakegame.data.dds.publisher.InRoomPublisher;
 import com.example.snakegame.data.dds.publisher.LeaveRoomPublisher;
-import com.example.snakegame.data.dds.subscriber.PlayerColorMappingsSubscriber;
-import com.example.snakegame.data.dds.subscriber.InRoomSubscriber;
 
+import com.example.snakegame.thread.InRoomSubscriberThread;
+import com.example.snakegame.thread.PlayerAuthSubscriberThread;
+import com.example.snakegame.thread.PlayerColorMappingsSubscriberThread;
+import com.example.snakegame.uitls.DataCallback;
 import com.example.snakegame.uitls.DataCallbackColorMap;
 import com.example.snakegame.uitls.DataCallbackRoom;
 
-public class RoomActivity extends AppCompatActivity implements DataCallbackRoom, DataCallbackColorMap {
+public class RoomActivity extends AppCompatActivity implements DataCallbackRoom {
     private TextView tvRoomId, tvPlayerCount;// 房间号 玩家人数
     private Button btnCopyRoomId, btnLeaveRoom, btnStartGame;// 复制按钮，离开房间按钮，开始游戏按钮
     private RecyclerView rvPlayers;//回收视图，列表显示组件，用于高效地显示大量数据
@@ -43,7 +46,6 @@ public class RoomActivity extends AppCompatActivity implements DataCallbackRoom,
     private String roomId;  // 6位房间号
     private int domain_id; // 根据房间号计算得到的域号
     private boolean isHost; // 普通玩家和房主都会显示该页面，所以需要区分（有无开始按钮）
-    private int domainId;  // 6位房间号转换得到的域号
     private boolean getColors = false;
 
     // 从本地存储中获得玩家ID和昵称
@@ -55,32 +57,60 @@ public class RoomActivity extends AppCompatActivity implements DataCallbackRoom,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room);
 
-        // 各种订阅者和发布者的初始化
+        // 创建并启动监听线程
+        new InRoomSubscriberThread(new DataCallback<InRoom>() {
+            @Override
+            public void onDataReceived(InRoom result) {
+                runOnUiThread(() -> {
+                    // 以下内容在主线程执行
+                    if (result.room_id != null && result.room_id.equals(roomId)) {
+                        if(result.room_state == "waiting"){
+                            updatePlayers(result);
+                        }else if(result.room_state == "playing"){
+                            startGame();
+                        }
+                    }
+                });
+            }
+        }).start();
+
+        new PlayerColorMappingsSubscriberThread(new DataCallback<PlayerColorMappings>() {
+            @Override
+            public void onDataReceived(PlayerColorMappings result) {
+                runOnUiThread(() -> {
+                    // 以下内容在主线程执行
+                    if (result.room_id != null && result.room_id.equals(roomId)) {
+                        savePlayerColorMapping(result);
+                    }
+                });
+            }
+        }).start();
+
+        // 发布者的初始化
         InRoomPublisher.initialize();
         LeaveRoomPublisher.initialize();
-        InRoomSubscriber.initialize();
-        PlayerColorMappingsSubscriber.initialize();
         
         // 获取本地存储
         sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
-        isHost = getIntent().getBooleanExtra("isHost", false);// Intent 是 Android 中用于组件间通信的消息对象,从 Intent 中获取一个布尔值（boolean）参数,判断是否为房主
+        isHost = getIntent().getBooleanExtra("isHost", true);// Intent 是 Android 中用于组件间通信的消息对象,从 Intent 中获取一个布尔值（boolean）参数,判断是否为房主
         roomId = getIntent().getStringExtra("roomId");
+        if (roomId == null) {
+            // 处理roomId不存在的情况
+            roomId = "123456";  // 手动设置默认值
+        }
 
         // 根据房间号计算得到对应域号
         domain_id = encryptRoomIdToDomain(Integer.parseInt(roomId));
         
         // 初始化当前玩家信息
-        currentPlayerId = sharedPreferences.getInt("player_id", 0);
+        currentPlayerId = sharedPreferences.getInt("player_id", 13);
         currentPlayerNickname = sharedPreferences.getString("nickname", "nickname");
 
         // 如果是房主，发送初始的房间信息
         if(isHost){
             createRoom();
+            Toast.makeText(this, "我是房主，已发送数据", Toast.LENGTH_SHORT).show();
         }
-
-        // 开启监听
-        InRoomSubscriber.receiveData(roomId,this);
-        PlayerColorMappingsSubscriber.receiveData(roomId,this);
 
         initViews();// 将布局上的内容与类内字段相连
         setupRecyclerView();// 设置回收视图，和类内字段playerList相连
@@ -94,6 +124,8 @@ public class RoomActivity extends AppCompatActivity implements DataCallbackRoom,
         btnLeaveRoom = findViewById(R.id.btn_leave_room); // 离开房间按钮
         btnStartGame = findViewById(R.id.btn_start_game); // 开始游戏按钮
         rvPlayers = findViewById(R.id.rv_players); // 列表视图
+
+        tvRoomId.setText(roomId);
     }
     
     private void setupRecyclerView() {
@@ -154,10 +186,14 @@ public class RoomActivity extends AppCompatActivity implements DataCallbackRoom,
     private void createRoom(){
         InRoom data = new InRoom();
         data.room_id = roomId;
-        data.player_id = currentPlayerId;
-        data.player_nickname = currentPlayerNickname;
+        Toast.makeText(this, data.room_id, Toast.LENGTH_SHORT).show();
+        data.player_id = 22;
+        Toast.makeText(this, Integer.toString(data.player_id), Toast.LENGTH_SHORT).show();
+        data.player_nickname = "xm";
+        Toast.makeText(this, data.player_nickname, Toast.LENGTH_SHORT).show();
         data.room_state = "empty";
-        InRoomPublisher.sendData(data);
+        Toast.makeText(this, data.room_state, Toast.LENGTH_SHORT).show();
+        InRoomPublisher.sendData(this,data);
     }
 
     // 更新玩家列表
@@ -252,5 +288,10 @@ public class RoomActivity extends AppCompatActivity implements DataCallbackRoom,
         public String getNickname() { return nickname; }
         public boolean isHost() { return isHost; }
         public String getColor() { return color; }
+    }
+
+    @Override
+    public void sendDataSuccess() {
+        Toast.makeText(this, "真的发送了", Toast.LENGTH_SHORT).show();
     }
 }

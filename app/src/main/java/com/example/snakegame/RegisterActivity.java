@@ -1,9 +1,6 @@
 package com.example.snakegame;
 
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,8 +12,7 @@ import com.example.snakegame.DDSgenerated.PlayerAuth;
 
 
 import com.example.snakegame.data.dds.publisher.PlayerAuthPublisher;
-import com.example.snakegame.uitls.DataCallbackLogin;
-import com.example.snakegame.uitls.DataCallbackRegister;
+import com.example.snakegame.uitls.DataCallback;
 
 import com.example.snakegame.thread.PlayerAuthSubscriberThread;
 
@@ -33,7 +29,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         // 创建并启动监听线程
-        new PlayerAuthSubscriberThread(new DataCallbackLogin() {
+        new PlayerAuthSubscriberThread(new DataCallback<PlayerAuth>() {
             @Override
             public void onDataReceived(PlayerAuth result) {
                 runOnUiThread(() -> {
@@ -106,6 +102,9 @@ public class RegisterActivity extends AppCompatActivity {
     private void checkData(PlayerAuth result) {
         if(result.nickname.equals(etNickname.getText().toString().trim()) && result.auth_type.equals("REGISTER_SUCCESS")){
             Toast.makeText(this, "注册成功！请登录", Toast.LENGTH_SHORT).show();
+            finish();
+        }else if(result.nickname.equals(etNickname.getText().toString().trim()) && result.auth_type.equals("REGISTER_SUCCESS")){
+            Toast.makeText(this, "注册失败，昵称重复！", Toast.LENGTH_SHORT).show();
             finish();
         }
     }

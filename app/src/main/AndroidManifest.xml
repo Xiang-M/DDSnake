@@ -43,7 +43,7 @@
         <!-- 房间页面 -->
         <activity
             android:name=".RoomActivity"
-            android:exported="false"
+            android:exported="true"
             android:screenOrientation="landscape" />
         
         <!-- 加入房间页面 -->

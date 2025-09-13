@@ -1,10 +1,10 @@
 package com.example.snakegame.thread;
 
-import com.example.snakegame.DDSgenerated.PlayerAuth;
-import com.example.snakegame.DDSgenerated.PlayerAuthDataReader;
-import com.example.snakegame.DDSgenerated.PlayerAuthSeq;
+import com.example.snakegame.DDSgenerated.PlayerColorMappings;
+import com.example.snakegame.DDSgenerated.PlayerColorMappingsDataReader;
+import com.example.snakegame.DDSgenerated.PlayerColorMappingsSeq;
 
-import com.example.snakegame.DDSgenerated.PlayerAuthTypeSupport;
+import com.example.snakegame.DDSgenerated.PlayerColorMappingsTypeSupport;
 import com.zrdds.domain.DomainParticipant;
 import com.zrdds.domain.DomainParticipantFactory;
 import com.zrdds.infrastructure.InstanceStateKind;
@@ -29,11 +29,11 @@ import com.zrdds.topic.Topic;
 
 import com.example.snakegame.uitls.DataCallback;
 
-public class PlayerAuthSubscriberThread extends Thread {
+public class PlayerColorMappingsSubscriberThread extends Thread {
     private volatile boolean isRunning = true;
     private DataCallback callback;
 
-    public PlayerAuthSubscriberThread(DataCallback callback){
+    public PlayerColorMappingsSubscriberThread(DataCallback callback){
         this.callback = callback;
     }
 
@@ -41,7 +41,7 @@ public class PlayerAuthSubscriberThread extends Thread {
     public void run() {
         // 创建域参与者
         DomainParticipant dp = DomainParticipantFactory.get_instance().create_participant(
-                69,
+                6,
                 DomainParticipantFactory.PARTICIPANT_QOS_DEFAULT,
                 null,
                 StatusKind.STATUS_MASK_NONE
@@ -60,8 +60,8 @@ public class PlayerAuthSubscriberThread extends Thread {
             throw new RuntimeException("Failed to create subscriber");
         }
 
-        // 注册 PlayerAuth 类型
-        PlayerAuthTypeSupport ts = (PlayerAuthTypeSupport) PlayerAuthTypeSupport.get_instance();
+        // 注册 PlayerColorMappings 类型
+        PlayerColorMappingsTypeSupport ts = (PlayerColorMappingsTypeSupport) PlayerColorMappingsTypeSupport.get_instance();
         ReturnCode_t rtn = ts.register_type(dp, null);
         if (rtn != ReturnCode_t.RETCODE_OK) {
             throw new RuntimeException("Failed to register type");
@@ -69,7 +69,7 @@ public class PlayerAuthSubscriberThread extends Thread {
 
         // 创建 Topic
         Topic tp = dp.create_topic(
-                "PLAYERAUTH_RESULT",
+                "COLORMAP",
                 ts.get_type_name(),
                 DomainParticipant.TOPIC_QOS_DEFAULT,
                 null,
@@ -80,7 +80,7 @@ public class PlayerAuthSubscriberThread extends Thread {
         }
 
         // 创建监听器
-        LoginDataReaderListener listener = new LoginDataReaderListener();
+        PlayerColorMappingsDataReaderListener listener = new PlayerColorMappingsDataReaderListener();
 
         // 设置读者质量
         DataReaderQos drQos = Subscriber.DATAREADER_QOS_DEFAULT;
@@ -96,10 +96,10 @@ public class PlayerAuthSubscriberThread extends Thread {
         while (isRunning) {}
     }
 
-    class LoginDataReaderListener implements DataReaderListener {
+    class PlayerColorMappingsDataReaderListener implements DataReaderListener {
         public void on_data_available(DataReader dataReader) {
-            PlayerAuthDataReader dr = (PlayerAuthDataReader) (dataReader);
-            PlayerAuthSeq dataSeq = new PlayerAuthSeq();
+            PlayerColorMappingsDataReader dr = (PlayerColorMappingsDataReader) (dataReader);
+            PlayerColorMappingsSeq dataSeq = new PlayerColorMappingsSeq();
             SampleInfoSeq infoSeq = new SampleInfoSeq();
             ReturnCode_t rtn;
             System.out.println("receive receive receive receive receive receive receive receive ");
@@ -118,7 +118,7 @@ public class PlayerAuthSubscriberThread extends Thread {
                     continue;
                 }
                 // 获取接收到的数据
-                PlayerAuth receivedData = dataSeq.get_at(i);
+                PlayerColorMappings receivedData = dataSeq.get_at(i);
                 callback.onDataReceived(receivedData);
             }
 
@@ -126,6 +126,7 @@ public class PlayerAuthSubscriberThread extends Thread {
             rtn = dr.return_loan(dataSeq, infoSeq);
             if (rtn != ReturnCode_t.RETCODE_OK) {
                 System.out.println("return loan failed");
+                return;
             }
         }
 

@@ -52,7 +52,7 @@ public class HomeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(HomeActivity.this, RoomActivity.class);
                 intent.putExtra("isHost", true);
-                intent.putExtra("roomId", "123456");// 随机生成6位房间号
+                intent.putExtra("roomId", generateSixDigitNumber());// 随机生成6位房间号
                 startActivity(intent);
             }
         });

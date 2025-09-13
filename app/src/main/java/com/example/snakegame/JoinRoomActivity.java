@@ -11,16 +11,23 @@ import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.snakegame.DDSgenerated.InRoom;
 import com.example.snakegame.DDSgenerated.JoinRoom;
 
+import com.example.snakegame.DDSgenerated.PlayerAuth;
+import com.example.snakegame.data.dds.publisher.InRoomPublisher;
+import com.example.snakegame.thread.JoinRoomSubscriberThread;
+import com.example.snakegame.thread.PlayerAuthSubscriberThread;
+import com.example.snakegame.uitls.DataCallback;
 import com.example.snakegame.uitls.DataCallbackJoinRoom;
 
 import com.example.snakegame.data.dds.publisher.JoinRoomPublisher;
-import com.example.snakegame.data.dds.subscriber.JoinRoomSubscriber;
+import com.example.snakegame.uitls.DataCallbackRoom;
 
-public class JoinRoomActivity extends AppCompatActivity implements DataCallbackJoinRoom {
+public class JoinRoomActivity extends AppCompatActivity implements DataCallbackRoom {
     private static final String TAG = "JoinRoomActivity";
     private String roomId = "";
+    private int player_id = 0;
     private AlertDialog dialog;
     private EditText etRoomId;
     private Button btnCancel;
@@ -30,11 +37,29 @@ public class JoinRoomActivity extends AppCompatActivity implements DataCallbackJ
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
+        player_id = sharedPreferences.getInt("player_id",0);
+
+        // 创建并启动监听线程
+        new JoinRoomSubscriberThread(new DataCallback<JoinRoom>() {
+            @Override
+            public void onDataReceived(JoinRoom result) {
+                runOnUiThread(() -> {
+                    // 以下内容在主线程执行
+                    if (result.room_id != null && result.room_id.equals(roomId)&&
+                            result.player_id == player_id) {
+                        if(result.status == "SUCCESS"){
+                            joinRoomSuccess();
+                        }else if(result.status == "FAILURE"){
+                            joinRoomFailure();
+                        }
+                    }
+                });
+            }
+        }).start();
 
         // JOINROOM发布端初始化
         JoinRoomPublisher.initialize();
-        // JOINROOMREPLY订阅端初始化
-        JoinRoomSubscriber.initialize();
+        InRoomPublisher.initialize();
 
         showJoinRoomDialog();// 展示弹窗以及交互
     }
@@ -86,19 +111,26 @@ public class JoinRoomActivity extends AppCompatActivity implements DataCallbackJ
             return;
         }
 
-        // 准备好发送的数据
-        // 创建数据
-        JoinRoom data = new JoinRoom();
-        data.player_id = sharedPreferences.getInt("player_id", 0);
-        data.player_nickname = sharedPreferences.getString("nickname","nickname");
+        InRoom data = new InRoom();
         data.room_id = roomId;
-        data.status = "REQUEST";
+        Toast.makeText(this, data.room_id, Toast.LENGTH_SHORT).show();
+        data.player_id = 22;
+        Toast.makeText(this, Integer.toString(data.player_id), Toast.LENGTH_SHORT).show();
+        data.player_nickname = "xm";
+        Toast.makeText(this, data.player_nickname, Toast.LENGTH_SHORT).show();
+        data.room_state = "empty";
+        Toast.makeText(this, data.room_state, Toast.LENGTH_SHORT).show();
+        InRoomPublisher.sendData(this,data);
+
+        // 创建数据
+//        JoinRoom data = new JoinRoom();
+//        data.player_id = sharedPreferences.getInt("player_id", 0);
+//        data.player_nickname = sharedPreferences.getString("nickname","nickname");
+//        data.room_id = roomId;
+//        data.status = "REQUEST";
 
         // 发送加入房间的申请
-        JoinRoomPublisher.sendData(data);
-
-        // 接收回复结果
-        JoinRoomSubscriber.receiveData(data,this);
+        //JoinRoomPublisher.sendData(data);
     }
 
     // 成功加入房间，就进入RoomActivity，并关闭弹窗
@@ -115,7 +147,9 @@ public class JoinRoomActivity extends AppCompatActivity implements DataCallbackJ
     public void joinRoomFailure(){
         Toast.makeText(JoinRoomActivity.this, "当前房间不可进，请确认房间号输入正确", Toast.LENGTH_SHORT).show();
     }
-    public void onError(Exception e){
-        Log.d(TAG,"数据接收失败，错误: " + e.getMessage());
+
+    @Override
+    public void sendDataSuccess() {
+        Toast.makeText(this, "真的发送了", Toast.LENGTH_SHORT).show();
     }
 }

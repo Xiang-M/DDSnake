@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.snakegame.DDSgenerated.PlayerAuth;
 import com.example.snakegame.data.dds.publisher.PlayerAuthPublisher;
-import com.example.snakegame.uitls.DataCallbackLogin;
+import com.example.snakegame.uitls.DataCallback;
 
 import com.example.snakegame.thread.PlayerAuthSubscriberThread;
 
@@ -31,7 +31,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         // 创建并启动监听线程
-        new PlayerAuthSubscriberThread(new DataCallbackLogin() {
+        new PlayerAuthSubscriberThread(new DataCallback<PlayerAuth>() {
             @Override
             public void onDataReceived(PlayerAuth result) {
                 runOnUiThread(() -> {
@@ -110,6 +110,8 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, HomeActivity.class));
             finish();
+        }else if(result.nickname.equals(etNickname.getText().toString().trim()) && result.auth_type.equals("LOGIN_FAIL")){
+            Toast.makeText(this, "登录失败，请确认昵称和密码匹配", Toast.LENGTH_SHORT).show();
         }
     }
 }

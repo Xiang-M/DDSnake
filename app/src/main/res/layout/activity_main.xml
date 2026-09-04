@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000">
 
     <!-- 游戏画面 - 铺满整个屏幕 -->
+
+    <!-- 左上角分数信息 -->
     <com.example.snakegame.ui.view.GameSurfaceView
         android:id="@+id/game_surface_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- 左上角分数信息 -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -40,35 +42,22 @@
 
     </LinearLayout>
 
-    <!-- 右上角排行榜 -->
-    <LinearLayout
+    <!-- 右上角排行榜，字体更小，宽度自适应 -->
+    <TextView
+        android:id="@+id/tv_leaderboard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:orientation="vertical"
+        android:text="排行榜"
+        android:textColor="#fff"
+        android:textSize="13sp"
         android:background="#80000000"
-        android:padding="8dp"
-        android:layout_margin="8dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="排行榜"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:gravity="center" />
-
-        <TextView
-            android:id="@+id/tv_leaderboard"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="等待开始..."
-            android:textColor="#CCCCCC"
-            android:textSize="12sp"
-            android:layout_marginTop="4dp" />
-
-    </LinearLayout>
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="30dp"/>
 
     <!-- 左下角方向控制区域 - 十字形布局，稍微向右偏移 -->
     <include
@@ -81,7 +70,126 @@
         android:layout_marginLeft="32dp"
         android:layout_marginBottom="16dp" />
 
-    <!-- 游戏状态提示 -->
+    <!-- 右侧快捷语按钮组：减小高度和上下间距 -->
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="12dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:fillViewport="false"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:clipToPadding="false">
+
+        <LinearLayout
+            android:id="@+id/quick_message_panel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp">
+
+            <Button
+                android:id="@+id/btn_message_1"
+                android:layout_width="120dp"
+                android:layout_height="30dp"
+                android:layout_marginBottom="4dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:backgroundTint="#6C4EB6"
+                android:textColor="#FFFFFF"
+                android:text="菜！就多练"
+                android:textSize="9.5sp"
+                android:gravity="center"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:includeFontPadding="true"
+                android:background="@drawable/quick_msg_btn_bg"/>
+
+            <Button
+                android:id="@+id/btn_message_2"
+                android:layout_width="120dp"
+                android:layout_height="30dp"
+                android:layout_marginBottom="4dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:backgroundTint="#6C4EB6"
+                android:textColor="#FFFFFF"
+                android:text="抱歉"
+                android:textSize="9.5sp"
+                android:gravity="center"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:includeFontPadding="true"
+                android:background="@drawable/quick_msg_btn_bg"/>
+
+            <Button
+                android:id="@+id/btn_message_3"
+                android:layout_width="120dp"
+                android:layout_height="30dp"
+                android:layout_marginBottom="4dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:backgroundTint="#6C4EB6"
+                android:textColor="#FFFFFF"
+                android:text="大哥别杀我"
+                android:textSize="9.5sp"
+                android:gravity="center"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:includeFontPadding="true"
+                android:background="@drawable/quick_msg_btn_bg"/>
+
+            <Button
+                android:id="@+id/btn_message_4"
+                android:layout_width="120dp"
+                android:layout_height="30dp"
+                android:layout_marginBottom="4dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:backgroundTint="#6C4EB6"
+                android:textColor="#FFFFFF"
+                android:text="哈基米哟~南北绿豆"
+                android:textSize="9.5sp"
+                android:gravity="center"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:includeFontPadding="true"
+                android:background="@drawable/quick_msg_btn_bg"/>
+
+
+            <Button
+                android:id="@+id/btn_message_5"
+                android:layout_width="120dp"
+                android:layout_height="30dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:backgroundTint="#6C4EB6"
+                android:textColor="#FFFFFF"
+                android:text="不收徒"
+                android:textSize="9.5sp"
+                android:gravity="center"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:includeFontPadding="true"
+                android:background="@drawable/quick_msg_btn_bg"/>
+        </LinearLayout>
+    </ScrollView>
+
     <TextView
         android:id="@+id/tv_game_status"
         android:layout_width="wrap_content"

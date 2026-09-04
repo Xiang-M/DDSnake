@@ -7,6 +7,7 @@ import com.example.snakegame.DDSgenerated.LeaveRoomDataWriter;
 import com.example.snakegame.DDSgenerated.LeaveRoomTypeSupport;
 import com.zrdds.domain.DomainParticipant;
 import com.zrdds.domain.DomainParticipantFactory;
+import com.zrdds.domain.DomainParticipantQos;
 import com.zrdds.infrastructure.InstanceHandle_t;
 import com.zrdds.infrastructure.ReturnCode_t;
 import com.zrdds.infrastructure.StatusKind;
@@ -24,10 +25,16 @@ public class LeaveRoomPublisher {
     private static ReturnCode_t rtn;
 
     public static void initialize(){
+        DomainParticipantQos dpQos = new DomainParticipantQos();
+        DomainParticipantFactory.get_instance().get_default_participant_qos(dpQos);
+//        dpQos.metatraffic_receive_addresses.addresses.ensure_length(1, 1);
+//        dpQos.metatraffic_receive_addresses.addresses.set_at(0, "udpv4://192.168.137.0//0");
+//        dpQos.usertraffic_receive_addresses.addresses.ensure_length(1, 1);
+//        dpQos.usertraffic_receive_addresses.addresses.set_at(0, "udpv4://192.168.137.0//0");
         // 创建域参与者
         dp = DomainParticipantFactory.get_instance().create_participant(
                 DOMAIN_ID,
-                DomainParticipantFactory.PARTICIPANT_QOS_DEFAULT,
+                dpQos,
                 null,
                 StatusKind.STATUS_MASK_NONE
         );

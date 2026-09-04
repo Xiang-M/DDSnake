@@ -30,7 +30,6 @@ import com.zrdds.topic.Topic;
 import com.example.snakegame.uitls.DataCallback;
 
 public class PlayerAuthSubscriberThread extends Thread {
-    private volatile boolean isRunning = true;
     private DataCallback callback;
 
     public PlayerAuthSubscriberThread(DataCallback callback){
@@ -91,9 +90,6 @@ public class PlayerAuthSubscriberThread extends Thread {
         if (dr == null) {
             throw new RuntimeException("Failed to create dataReader");
         }
-
-        // 一直循环
-        while (isRunning) {}
     }
 
     class LoginDataReaderListener implements DataReaderListener {
@@ -163,14 +159,5 @@ public class PlayerAuthSubscriberThread extends Thread {
             // TODO 自动生成的方法存根
         }
 
-    }
-
-    public void stopListening() {
-        isRunning = false;
-    }
-
-    private String receiveMessage() {
-        // 实现你的消息接收逻辑
-        return "新消息";
     }
 }

@@ -1,12 +1,16 @@
 module SnakeGame{
 
-    // 登录、认证
+    // 认证回复
     struct PlayerAuth {
         long player_id;
         string nickname;
-        string password;   // 或 token
-        string auth_type;    // "REGISTER" 或 "LOGIN"
+        string password;
+        string auth_type;
+        // "LOGIN_SUCCESS" "LOGIN_FAIL"
+        // "REGISTER_SUCCESS" "REGISTER_FAIL"
     };
+
+
     // 高频操作
     struct PlayerMove {
         long player_id;

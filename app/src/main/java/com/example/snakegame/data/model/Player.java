@@ -1,7 +1,7 @@
 package com.example.snakegame.data.model;
 
 public class Player {
-    private String playerId;
+    private int playerId;
     private String nickname;
     private int score;
     
@@ -9,11 +9,11 @@ public class Player {
         this.score = 0;
     }
     
-    public String getPlayerId() {
+    public int getPlayerId() {
         return playerId;
     }
     
-    public void setPlayerId(String playerId) {
+    public void setPlayerId(int playerId) {
         this.playerId = playerId;
     }
     

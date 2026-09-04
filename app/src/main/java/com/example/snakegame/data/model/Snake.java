@@ -4,7 +4,7 @@ package com.example.snakegame.data.model;
 import java.util.List;
 
 public class Snake {
-    private String playerId;
+    private int playerId;
     private String nickname;
     private String color;
     private int score;
@@ -31,11 +31,11 @@ public class Snake {
     }
     
     // Getters and Setters
-    public String getPlayerId() {
+    public int getPlayerId() {
         return playerId;
     }
     
-    public void setPlayerId(String playerId) {
+    public void setPlayerId(int playerId) {
         this.playerId = playerId;
     }
     

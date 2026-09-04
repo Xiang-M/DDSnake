@@ -6,7 +6,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.snakegame.data.dds.publisher.InRoomPublisher;
+import com.example.snakegame.thread.ThreadManager;
 
 import java.util.Random;
 
@@ -20,6 +24,12 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        // 提前量
+        InRoomPublisher.initialize();
+
+        // 创建并启动三个监听线程
+        ThreadManager.initialize();
         
         sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
         
@@ -70,7 +80,6 @@ public class HomeActivity extends AppCompatActivity {
         btnSingleGame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 启动定时积分赛游戏
                 startActivity(new Intent(HomeActivity.this, MainActivity.class));
             }
         });

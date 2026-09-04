@@ -6,7 +6,6 @@ import com.example.snakegame.DDSgenerated.PlayerAuth;
 import com.example.snakegame.DDSgenerated.PlayerAuthDataWriter;
 import com.example.snakegame.DDSgenerated.PlayerAuthTypeSupport;
 import com.zrdds.domain.DomainParticipant;
-import com.zrdds.domain.DomainParticipantFactory;
 import com.zrdds.infrastructure.InstanceHandle_t;
 import com.zrdds.infrastructure.ReturnCode_t;
 import com.zrdds.infrastructure.StatusKind;
@@ -24,6 +23,10 @@ public class PlayerAuthPublisher {
     private static PlayerAuthDataWriter writer;
     private static DDSManager ddsManager;
     private static ReturnCode_t rtn;
+
+    public PlayerAuthPublisher(){
+        initialize();
+    }
 
     public static void initialize(){
         ddsManager = DDSManager.getInstance();

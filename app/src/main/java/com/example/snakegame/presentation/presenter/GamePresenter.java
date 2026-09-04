@@ -22,7 +22,7 @@ public class GamePresenter implements GameContract.Presenter {
     private boolean isGameActive;
     
     // 玩家信息
-    private String playerId;
+    private int playerId;
     private String playerNickname;
     private String playerColor;
     
@@ -50,8 +50,8 @@ public class GamePresenter implements GameContract.Presenter {
     }
     
     @Override
-    public void initializeGame(long playerId, String nickname, String color) {
-        this.playerId = String.valueOf(playerId);
+    public void initializeGame(int playerId, String nickname, String color) {
+        this.playerId = playerId;
         this.playerNickname = nickname;
         this.playerColor = color;
         this.isTimedScoreMode = true; // 强制启用定时积分赛
@@ -71,7 +71,7 @@ public class GamePresenter implements GameContract.Presenter {
     
     // 新增：初始化定时积分赛模式
     @Override
-    public void initializeTimedScoreMode(long playerId, String nickname, String color) {
+    public void initializeTimedScoreMode(int playerId, String nickname, String color) {
         this.isTimedScoreMode = true;
         this.gameStartTime = System.currentTimeMillis();
         initializeGame(playerId, nickname, color);
@@ -107,62 +107,10 @@ public class GamePresenter implements GameContract.Presenter {
         // 更新视野以蛇头为中心
         gameWorld.updateViewToCenter(bodyPoints.get(0));
         
-        // 创建Bot蛇
-        createBotSnakes();
-        
         updateLeaderboard();
         
         // 使用新的初始食物生成方法
         generateInitialFood();
-    }
-
-
-        // 添加createBotSnakes方法到GamePresenter类中
-    private void createBotSnakes() {
-        List<Snake> otherSnakes = new ArrayList<>();
-        Random random = new Random();
-        
-        // 创建多个Bot蛇
-        String[] botNames = {"Bot Alpha", "Bot Beta", "Bot Gamma", "Snake AI"};
-        String[] botColors = {"#FF00FF", "#00FFFF", "#FFFF00", "#FF8000"};
-        
-        for (int i = 0; i < botNames.length; i++) {
-            Snake botSnake = new Snake();
-            botSnake.setPlayerId("bot" + (i + 1));
-            botSnake.setNickname(botNames[i]);
-            botSnake.setColor(botColors[i]);
-            botSnake.setScore(random.nextInt(15) + 1); // 1-15的随机分数
-            botSnake.setAlive(true);
-            
-            // 在世界地图的随机位置生成Bot蛇
-            List<Point> botBodyPoints = new ArrayList<>();
-            Point startPos;
-            int attempts = 0;
-            
-            do {
-                startPos = new Point(
-                    random.nextInt(gameWorld.getWorldMapCols() - 10) + 5,
-                    random.nextInt(gameWorld.getWorldMapRows() - 10) + 5
-                );
-                attempts++;
-            } while (isPositionOccupied(startPos) && attempts < 20);
-            
-            if (attempts < 20) {
-                botBodyPoints.add(startPos);
-                botBodyPoints.add(new Point(startPos.getX(), startPos.getY() + 1));
-                botBodyPoints.add(new Point(startPos.getX(), startPos.getY() + 2));
-                
-                botSnake.setBodyPoints(botBodyPoints);
-                
-                // 随机方向
-                String[] directions = {"UP", "DOWN", "LEFT", "RIGHT"};
-                botSnake.setDirection(directions[random.nextInt(directions.length)]);
-                
-                otherSnakes.add(botSnake);
-            }
-        }
-        
-        gameWorld.setOtherSnakes(otherSnakes);
     }
 
     // 修改初始食物生成
@@ -448,10 +396,10 @@ private void ensureFoodInViewport() {
         gameWorld = new GameWorld();
         gameWorld.setWorldMapCols(100);
         gameWorld.setWorldMapRows(100);
-        gameWorld.setGameSpeed(180); // 调大数值让蛇移动变慢
+        gameWorld.setGameSpeed(125); // 调大数值让蛇移动变慢
         
         // 重新设置定时模式（总是启用）
-        initializeTimedScoreMode(Long.parseLong(playerId), playerNickname, playerColor);
+        initializeTimedScoreMode(playerId, playerNickname, playerColor);
         
         // 启动新游戏
         startGame();
@@ -572,7 +520,7 @@ private void ensureFoodInViewport() {
             // 在其他蛇中寻找排行榜第一名
             if (gameWorld.getOtherSnakes() != null) {
                 for (Snake snake : gameWorld.getOtherSnakes()) {
-                    if (snake.isAlive() && snake.getPlayerId().equals(topPlayer.getPlayerId())) {
+                    if (snake.isAlive() && snake.getPlayerId() == topPlayer.getPlayerId()) {
                         targetSnake = snake;
                         break;
                     }
@@ -636,7 +584,7 @@ private void ensureFoodInViewport() {
             // 寻找排行榜第一名对应的活着的蛇
             if (gameWorld.getOtherSnakes() != null) {
                 for (Snake snake : gameWorld.getOtherSnakes()) {
-                    if (snake.isAlive() && snake.getPlayerId().equals(topPlayer.getPlayerId())) {
+                    if (snake.isAlive() && snake.getPlayerId() == topPlayer.getPlayerId()) {
                         targetSnake = snake;
                         break;
                     }

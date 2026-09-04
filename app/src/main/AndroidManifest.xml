@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.snakegame">
 
     <!-- 网络权限 -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -43,7 +44,7 @@
         <!-- 房间页面 -->
         <activity
             android:name=".RoomActivity"
-            android:exported="true"
+            android:exported="false"
             android:screenOrientation="landscape" />
         
         <!-- 加入房间页面 -->
@@ -52,23 +53,6 @@
             android:exported="false"
             android:screenOrientation="landscape" />
         
-        <!-- 用户设置页面 -->
-        <activity
-            android:name=".UserSettingsActivity"
-            android:exported="false"
-            android:screenOrientation="landscape" />
-        
-        <!-- 原有主页面 -->
-        <activity
-            android:name=".ui.activity.HomeActivity"
-            android:exported="false"
-            android:screenOrientation="landscape" />
-        
-        <!-- 原有玩家设置页面 -->
-        <activity
-            android:name=".ui.activity.LoginActivity"
-            android:exported="false"
-            android:screenOrientation="landscape" />
         
         <!-- 主游戏界面 -->
         <activity

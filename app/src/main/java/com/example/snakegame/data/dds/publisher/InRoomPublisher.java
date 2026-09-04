@@ -1,7 +1,6 @@
 package com.example.snakegame.data.dds.publisher;
 
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.snakegame.DDSgenerated.InRoom;
 import com.example.snakegame.DDSgenerated.InRoomDataWriter;
@@ -9,6 +8,7 @@ import com.example.snakegame.DDSgenerated.InRoomTypeSupport;
 import com.example.snakegame.uitls.DataCallbackRoom;
 import com.zrdds.domain.DomainParticipant;
 import com.zrdds.domain.DomainParticipantFactory;
+import com.zrdds.domain.DomainParticipantQos;
 import com.zrdds.infrastructure.InstanceHandle_t;
 import com.zrdds.infrastructure.ReturnCode_t;
 import com.zrdds.infrastructure.StatusKind;
@@ -26,10 +26,16 @@ public class InRoomPublisher {
     private static ReturnCode_t rtn;
 
     public static void initialize(){
+        DomainParticipantQos dpQos = new DomainParticipantQos();
+        DomainParticipantFactory.get_instance().get_default_participant_qos(dpQos);
+//        dpQos.metatraffic_receive_addresses.addresses.ensure_length(1, 1);
+//        dpQos.metatraffic_receive_addresses.addresses.set_at(0, "udpv4://192.168.137.0//0");
+//        dpQos.usertraffic_receive_addresses.addresses.ensure_length(1, 1);
+//        dpQos.usertraffic_receive_addresses.addresses.set_at(0, "udpv4://192.168.137.0//0");
         // 创建域参与者
         dp = DomainParticipantFactory.get_instance().create_participant(
                 DOMAIN_ID,
-                DomainParticipantFactory.PARTICIPANT_QOS_DEFAULT,
+                dpQos,
                 null,
                 StatusKind.STATUS_MASK_NONE
         );
@@ -87,7 +93,7 @@ public class InRoomPublisher {
         Log.d(TAG, "create data writer succeeded");
     }
 
-    public static void sendData(DataCallbackRoom callback,InRoom data) {
+    public static void sendData(InRoom data) {
         rtn = writer.write(data, InstanceHandle_t.HANDLE_NIL_NATIVE);
         if (rtn != ReturnCode_t.RETCODE_OK)
         {
@@ -95,6 +101,5 @@ public class InRoomPublisher {
             return;
         }
         Log.d(TAG, "write succeeded");
-        callback.sendDataSuccess();
     }
 }

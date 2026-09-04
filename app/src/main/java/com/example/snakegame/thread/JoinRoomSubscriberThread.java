@@ -7,6 +7,7 @@ import com.example.snakegame.DDSgenerated.JoinRoomSeq;
 import com.example.snakegame.DDSgenerated.JoinRoomTypeSupport;
 import com.zrdds.domain.DomainParticipant;
 import com.zrdds.domain.DomainParticipantFactory;
+import com.zrdds.domain.DomainParticipantQos;
 import com.zrdds.infrastructure.InstanceStateKind;
 import com.zrdds.infrastructure.LivelinessChangedStatus;
 import com.zrdds.infrastructure.ReliabilityQosPolicyKind;
@@ -33,16 +34,25 @@ public class JoinRoomSubscriberThread extends Thread {
     private volatile boolean isRunning = true;
     private DataCallback callback;
 
-    public JoinRoomSubscriberThread(DataCallback callback){
+    public void setCallback(DataCallback callback) {
         this.callback = callback;
+    }
+
+    public JoinRoomSubscriberThread(){
     }
 
     @Override
     public void run() {
+        DomainParticipantQos dpQos = new DomainParticipantQos();
+        DomainParticipantFactory.get_instance().get_default_participant_qos(dpQos);
+//        dpQos.metatraffic_receive_addresses.addresses.ensure_length(1, 1);
+//        dpQos.metatraffic_receive_addresses.addresses.set_at(0, "udpv4://192.168.137.0//0");
+//        dpQos.usertraffic_receive_addresses.addresses.ensure_length(1, 1);
+//        dpQos.usertraffic_receive_addresses.addresses.set_at(0, "udpv4://192.168.137.0//0");
         // 创建域参与者
         DomainParticipant dp = DomainParticipantFactory.get_instance().create_participant(
                 6,
-                DomainParticipantFactory.PARTICIPANT_QOS_DEFAULT,
+                dpQos,
                 null,
                 StatusKind.STATUS_MASK_NONE
         );
@@ -91,9 +101,6 @@ public class JoinRoomSubscriberThread extends Thread {
         if (dr == null) {
             throw new RuntimeException("Failed to create dataReader");
         }
-
-        // 一直循环
-        while (isRunning) {}
     }
 
     class JoinRoomDataReaderListener implements DataReaderListener {
@@ -119,7 +126,11 @@ public class JoinRoomSubscriberThread extends Thread {
                 }
                 // 获取接收到的数据
                 JoinRoom receivedData = dataSeq.get_at(i);
-                callback.onDataReceived(receivedData);
+                // 只有当callback传入之后才看传输的数据
+                if(callback != null)
+                {
+                    callback.onDataReceived(receivedData);
+                }
             }
 
             // 返还数据空间

@@ -26,8 +26,8 @@ public interface GameContract {
     interface Presenter {
         void attachView(View view);
         void detachView();
-        void initializeGame(long playerId, String nickname, String color);
-        void initializeTimedScoreMode(long playerId, String nickname, String color);
+        void initializeGame(int playerId, String nickname, String color);
+        void initializeTimedScoreMode(int playerId, String nickname, String color);
         void handlePlayerMove(String direction);
         void sendChatMessage(String message);
         void startGame();

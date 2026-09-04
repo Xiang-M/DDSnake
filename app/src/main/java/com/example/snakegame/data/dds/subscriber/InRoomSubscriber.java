@@ -1,10 +1,16 @@
-package com.example.snakegame.thread;
+package com.example.snakegame.data.dds.subscriber;
 
-import com.example.snakegame.DDSgenerated.PlayerColorMappings;
-import com.example.snakegame.DDSgenerated.PlayerColorMappingsDataReader;
-import com.example.snakegame.DDSgenerated.PlayerColorMappingsSeq;
+import android.content.Context;
+import android.util.Log;
+import android.widget.Toast;
 
-import com.example.snakegame.DDSgenerated.PlayerColorMappingsTypeSupport;
+import com.example.snakegame.DDSgenerated.ChatMsgTypeSupport;
+import com.example.snakegame.DDSgenerated.InRoom;
+import com.example.snakegame.DDSgenerated.InRoomDataReader;
+import com.example.snakegame.DDSgenerated.InRoomDataWriter;
+import com.example.snakegame.DDSgenerated.InRoomSeq;
+
+import com.example.snakegame.DDSgenerated.InRoomTypeSupport;
 import com.zrdds.domain.DomainParticipant;
 import com.zrdds.domain.DomainParticipantFactory;
 import com.zrdds.domain.DomainParticipantQos;
@@ -22,6 +28,7 @@ import com.zrdds.infrastructure.SampleStateKind;
 import com.zrdds.infrastructure.StatusKind;
 import com.zrdds.infrastructure.SubscriptionMatchedStatus;
 import com.zrdds.infrastructure.ViewStateKind;
+import com.zrdds.publication.Publisher;
 import com.zrdds.subscription.DataReader;
 import com.zrdds.subscription.DataReaderListener;
 import com.zrdds.subscription.DataReaderQos;
@@ -30,83 +37,86 @@ import com.zrdds.topic.Topic;
 
 import com.example.snakegame.uitls.DataCallback;
 
-public class PlayerColorMappingsSubscriberThread extends Thread {
-    private volatile boolean isRunning = true;
+
+public class InRoomSubscriber {
+    private final String TAG = "InRoomSubscriber";
+    private int domain_id = 6;
+    private DomainParticipant dp;
+    private Subscriber sub;
+    private Topic tp;
+    private DataReader reader;
+    private InRoomDataReaderListener listener;
+    private ReturnCode_t rtn;
     private DataCallback callback;
 
     public void setCallback(DataCallback callback) {
         this.callback = callback;
     }
 
-    public PlayerColorMappingsSubscriberThread(){
+    public InRoomSubscriber(DataCallback callback) {
+        this.callback = callback;
+        initDDS();
     }
 
-    @Override
-    public void run() {
-        DomainParticipantQos dpQos = new DomainParticipantQos();
-        DomainParticipantFactory.get_instance().get_default_participant_qos(dpQos);
-//        dpQos.metatraffic_receive_addresses.addresses.ensure_length(1, 1);
-//        dpQos.metatraffic_receive_addresses.addresses.set_at(0, "udpv4://192.168.137.0//0");
-//        dpQos.usertraffic_receive_addresses.addresses.ensure_length(1, 1);
-//        dpQos.usertraffic_receive_addresses.addresses.set_at(0, "udpv4://192.168.137.0//0");
-        // 创建域参与者
-        DomainParticipant dp = DomainParticipantFactory.get_instance().create_participant(
-                6,
-                dpQos,
-                null,
-                StatusKind.STATUS_MASK_NONE
-        );
-        if (dp == null) {
-            throw new RuntimeException("Failed to create domain participant");
-        }
+    private void initDDS(){
+        try {
+            // 创建 DomainParticipant
+            dp = DomainParticipantFactory.get_instance().create_participant(
+                    domain_id,
+                    DomainParticipantFactory.PARTICIPANT_QOS_DEFAULT,
+                    null,
+                    StatusKind.STATUS_MASK_NONE
+            );
 
-        // 创建订阅者
-        Subscriber sub = dp.create_subscriber(
-                DomainParticipant.SUBSCRIBER_QOS_DEFAULT,
-                null,
-                StatusKind.STATUS_MASK_NONE
-        );
-        if (sub == null) {
-            throw new RuntimeException("Failed to create subscriber");
-        }
+            if (dp == null) {
+                Log.e( TAG, "创建 DomainParticipant 失败");
+                return;
+            }
 
-        // 注册 PlayerColorMappings 类型
-        PlayerColorMappingsTypeSupport ts = (PlayerColorMappingsTypeSupport) PlayerColorMappingsTypeSupport.get_instance();
-        ReturnCode_t rtn = ts.register_type(dp, null);
-        if (rtn != ReturnCode_t.RETCODE_OK) {
-            throw new RuntimeException("Failed to register type");
-        }
+            // 注册类型
+            ChatMsgTypeSupport ts = (ChatMsgTypeSupport) ChatMsgTypeSupport.get_instance();
+            ReturnCode_t ret = ts.register_type(dp, null);
+            if (ret != ReturnCode_t.RETCODE_OK) {
+                Log.e(TAG, "注册类型失败");
+                return;
+            }
 
-        // 创建 Topic
-        Topic tp = dp.create_topic(
-                "COLORMAP",
-                ts.get_type_name(),
-                DomainParticipant.TOPIC_QOS_DEFAULT,
-                null,
-                StatusKind.STATUS_MASK_NONE
-        );
-        if (tp == null) {
-            throw new RuntimeException("Failed to create topic");
-        }
+            // 创建 Topic
+            tp = dp.create_topic(
+                    "UPDATEROOM",
+                    ts.get_type_name(),
+                    DomainParticipant.TOPIC_QOS_DEFAULT,
+                    null,
+                    StatusKind.STATUS_MASK_NONE
+            );
 
-        // 创建监听器
-        PlayerColorMappingsDataReaderListener listener = new PlayerColorMappingsDataReaderListener();
+            // 创建 Subscriber
+            sub = dp.create_subscriber(
+                    DomainParticipant.SUBSCRIBER_QOS_DEFAULT,
+                    null,
+                    StatusKind.STATUS_MASK_NONE
+            );
 
-        // 设置读者质量
-        DataReaderQos drQos = Subscriber.DATAREADER_QOS_DEFAULT;
-        drQos.reliability.kind= ReliabilityQosPolicyKind.RELIABLE_RELIABILITY_QOS;
+            // 创建 DataReader -> 订阅消息
+            listener = new InRoomDataReaderListener();
+            reader = sub.create_datareader(
+                    tp,
+                    Subscriber.DATAREADER_QOS_DEFAULT,
+                    listener, // 回调监听
+                    StatusKind.DATA_AVAILABLE_STATUS
+            );
 
-        // 创建数据读者
-        DataReader dr = sub.create_datareader(tp, drQos, listener, StatusKind.STATUS_MASK_ALL);
-        if (dr == null) {
-            throw new RuntimeException("Failed to create dataReader");
+            Log.d(TAG, "DDS 初始化成功");
+
+        } catch (Exception e) {
+            Log.e(TAG, "DDS 初始化失败", e);
         }
     }
 
-    class PlayerColorMappingsDataReaderListener implements DataReaderListener {
+    private class InRoomDataReaderListener implements DataReaderListener {
         public void on_data_available(DataReader dataReader) {
-            PlayerColorMappingsDataReader dr = (PlayerColorMappingsDataReader) (dataReader);
-            PlayerColorMappingsSeq dataSeq = new PlayerColorMappingsSeq();
+            InRoomDataReader dr = (InRoomDataReader) (dataReader);
+            InRoomSeq dataSeq = new InRoomSeq();
             SampleInfoSeq infoSeq = new SampleInfoSeq();
             ReturnCode_t rtn;
             System.out.println("receive receive receive receive receive receive receive receive ");
@@ -125,7 +135,7 @@ public class PlayerColorMappingsSubscriberThread extends Thread {
                     continue;
                 }
                 // 获取接收到的数据
-                PlayerColorMappings receivedData = dataSeq.get_at(i);
+                InRoom receivedData = dataSeq.get_at(i);
                 // 只有当callback传入之后才看传输的数据
                 if(callback != null)
                 {
@@ -137,7 +147,6 @@ public class PlayerColorMappingsSubscriberThread extends Thread {
             rtn = dr.return_loan(dataSeq, infoSeq);
             if (rtn != ReturnCode_t.RETCODE_OK) {
                 System.out.println("return loan failed");
-                return;
             }
         }
 
@@ -175,14 +184,5 @@ public class PlayerColorMappingsSubscriberThread extends Thread {
             // TODO 自动生成的方法存根
         }
 
-    }
-
-    public void stopListening() {
-        isRunning = false;
-    }
-
-    private String receiveMessage() {
-        // 实现你的消息接收逻辑
-        return "新消息";
     }
 }

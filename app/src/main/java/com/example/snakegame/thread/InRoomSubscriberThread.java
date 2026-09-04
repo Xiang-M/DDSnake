@@ -7,6 +7,7 @@ import com.example.snakegame.DDSgenerated.InRoomSeq;
 import com.example.snakegame.DDSgenerated.InRoomTypeSupport;
 import com.zrdds.domain.DomainParticipant;
 import com.zrdds.domain.DomainParticipantFactory;
+import com.zrdds.domain.DomainParticipantQos;
 import com.zrdds.infrastructure.InstanceStateKind;
 import com.zrdds.infrastructure.LivelinessChangedStatus;
 import com.zrdds.infrastructure.ReliabilityQosPolicyKind;
@@ -30,19 +31,27 @@ import com.zrdds.topic.Topic;
 import com.example.snakegame.uitls.DataCallback;
 
 public class InRoomSubscriberThread extends Thread {
-    private volatile boolean isRunning = true;
     private DataCallback callback;
 
-    public InRoomSubscriberThread(DataCallback callback){
+    public void setCallback(DataCallback callback) {
         this.callback = callback;
+    }
+
+    public InRoomSubscriberThread(){
     }
 
     @Override
     public void run() {
+        DomainParticipantQos dpQos = new DomainParticipantQos();
+        DomainParticipantFactory.get_instance().get_default_participant_qos(dpQos);
+//        dpQos.metatraffic_receive_addresses.addresses.ensure_length(1, 1);
+//        dpQos.metatraffic_receive_addresses.addresses.set_at(0, "udpv4://192.168.137.0//0");
+//        dpQos.usertraffic_receive_addresses.addresses.ensure_length(1, 1);
+//        dpQos.usertraffic_receive_addresses.addresses.set_at(0, "udpv4://192.168.137.0//0");
         // 创建域参与者
         DomainParticipant dp = DomainParticipantFactory.get_instance().create_participant(
                 6,
-                DomainParticipantFactory.PARTICIPANT_QOS_DEFAULT,
+                dpQos,
                 null,
                 StatusKind.STATUS_MASK_NONE
         );
@@ -91,9 +100,6 @@ public class InRoomSubscriberThread extends Thread {
         if (dr == null) {
             throw new RuntimeException("Failed to create dataReader");
         }
-
-        // 一直循环
-        while (isRunning) {}
     }
 
     class InRoomDataReaderListener implements DataReaderListener {
@@ -119,7 +125,11 @@ public class InRoomSubscriberThread extends Thread {
                 }
                 // 获取接收到的数据
                 InRoom receivedData = dataSeq.get_at(i);
-                callback.onDataReceived(receivedData);
+                // 只有当callback传入之后才看传输的数据
+                if(callback != null)
+                {
+                    callback.onDataReceived(receivedData);
+                }
             }
 
             // 返还数据空间
@@ -164,14 +174,5 @@ public class InRoomSubscriberThread extends Thread {
             // TODO 自动生成的方法存根
         }
 
-    }
-
-    public void stopListening() {
-        isRunning = false;
-    }
-
-    private String receiveMessage() {
-        // 实现你的消息接收逻辑
-        return "新消息";
     }
 }

@@ -16,10 +16,10 @@ public class MyApplication extends Application {
 
     @Override
     public void onCreate() {
-        super.onCreate();
-        loadDDSLibrary();
-        factoryInit();
-        DDSManager.getInstance().initializeCore(this);
+        super.onCreate();// 1. 首先调用父类初始化
+        loadDDSLibrary(); // 2. 加载DDS库
+        factoryInit(); // 3. 工厂模式初始化
+        DDSManager.getInstance().initializeCore(this);// 4. 将登录/注册的通信域内的基础实体创建
     }
 
     private void loadDDSLibrary() {
@@ -27,7 +27,7 @@ public class MyApplication extends Application {
             try {
                 System.loadLibrary("ZRDDS_JAVA");
                 isLibraryLoaded = true;
-                Log.d(TAG, "DDS library loaded successfully");
+                Log.i(TAG, "DDS library loaded successfully");
             } catch (UnsatisfiedLinkError e) {
                 Log.e(TAG, "Failed to load DDS library: " + e.getMessage());
             }
@@ -54,7 +54,4 @@ public class MyApplication extends Application {
         Log.i(TAG, "✓ DomainParticipantFactory创建成功");
     }
 
-    public static boolean isDDSLibraryLoaded() {
-        return isLibraryLoaded;
-    }
 }
